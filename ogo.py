@@ -40,7 +40,11 @@ def stop_switch(switch_id, config):
     nothing
     """
     switch_path = config.get("global", "session_path")
-    cmd = "vdecmd -s {switch_path}/switch-{switch_id}.mgmt shutdown".format(**locals())
+    # Arno: support for vdecmd on Debian Wheezy (ln -s /usr/bin/unixcmd /usr/bin/vdecmd also works)
+    vdecmd = "unixcmd -f /etc/vde2/vdecmd"
+    if os.path.exists("/usr/bin/vdecmd"):
+        vdecmd = "vdecmd"
+    cmd = vdecmd+" -s {switch_path}/switch-{switch_id}.mgmt shutdown".format(**locals())
     execute(cmd)
 
 
