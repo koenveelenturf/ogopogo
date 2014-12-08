@@ -303,7 +303,7 @@ def test(config):
         sys.stderr.write("ERROR: Configured root_image file does not exist.\n")
         broken = True
     elif os.stat(img).st_uid != os.getuid():
-        sys.stderr.write("ERROR: Configured root_iamge file is not owned by current user.\n")
+        sys.stderr.write("ERROR: Configured root_image file is not owned by current user.\n")
         broken = True
     # Check devices
     for device in config.sections():
