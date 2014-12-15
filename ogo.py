@@ -19,6 +19,12 @@ def execute(cmd):
 
 
 def stop_host(uml_id, config):
+    """
+    Stops a host
+    :param uml_id: the id of the uml host
+    :param config: global context
+    :returns: nothing
+    """
     cow_path = config.get("global", "session_path")
     root_image = config.get("global", "root_image")
     root_file = root_image.split("/")[-1]
@@ -32,19 +38,17 @@ def stop_host(uml_id, config):
 def stop_switch(switch_id, config):
     """ Builds a string to stop an VDE switch process
 
-    Arguments:
-    switch_id -- the id of the switch to be stopped
-    config - global config object
+    :param switch_id: the id of the switch to stop
+    :param config: global context
+    :returns: nothing
 
-    Returns:
-    nothing
     """
     switch_path = config.get("global", "session_path")
     # Arno: support for vdecmd on Debian Wheezy (ln -s /usr/bin/unixcmd /usr/bin/vdecmd also works)
     vdecmd = "unixcmd -f /etc/vde2/vdecmd"
     if os.path.exists("/usr/bin/vdecmd"):
         vdecmd = "vdecmd"
-    cmd = vdecmd+" -s {switch_path}/switch-{switch_id}.mgmt shutdown".format(**locals())
+    cmd = "{vdecmd} -s {switch_path}/switch-{switch_id}.mgmt shutdown".format(**locals())
     execute(cmd)
 
 
