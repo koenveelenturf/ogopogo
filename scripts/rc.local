@@ -6,7 +6,7 @@
 MAX_ETH=9
 
 #magic values pseudo-unique per student
-#These should all be single digit numbers
+#These should all be single digit decimal numbers
 A=6
 B=8
 #These should all be single digit hexadecimal numbers
@@ -15,7 +15,7 @@ Y="B"
 
 
 banner=`cat << EOF
-INR ogogpogo 2014
+INR ogogpogo 2015
 `
 echo $banner > /etc/motd
 
