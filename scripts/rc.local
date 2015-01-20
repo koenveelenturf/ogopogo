@@ -40,6 +40,7 @@ fi;
 
 #Z is a  magic value that is used to generate the mac address.
 #Each type of network device starts with a different sequence.
+Z="F"
 case ${role} in
         router)
         Z="A"
@@ -56,7 +57,12 @@ case ${role} in
 esac
 
 # Arno: if hostname ends in digit, use that in MAC address
-Z2=`echo ${name} $Z | awk '$1 ~ /^[a-zA-Z]+[0-9]$/ {print substr($1,length($1)); next} {print $2}'`
+if [ -z ${name} ]; then
+   Z2=$Z
+   index="00"
+else
+   Z2=`echo ${name} $Z | awk '$1 ~ /^[a-zA-Z]+[0-9]$/ {print substr($1,length($1)); next} {print $2}'`
+fi
 
 # set up networking...
 
