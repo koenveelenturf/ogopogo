@@ -40,7 +40,6 @@ fi;
 
 #Z is a  magic value that is used to generate the mac address.
 #Each type of network device starts with a different sequence.
-Z="F"
 case ${role} in
         router)
         Z="A"
@@ -57,12 +56,7 @@ case ${role} in
 esac
 
 # Arno: if hostname ends in digit, use that in MAC address
-if [ -z ${name} ]; then
-   Z2=$Z
-   index="00"
-else
-   Z2=`echo ${name} $Z | awk '$1 ~ /^[a-zA-Z]+[0-9]$/ {print substr($1,length($1)); next} {print $2}'`
-fi
+Z2=`echo ${name} $Z | awk '$1 ~ /^[a-zA-Z]+[0-9]$/ {print substr($1,length($1)); next} {print $2}'`
 
 # set up networking...
 
@@ -74,13 +68,15 @@ for ETH in $INTERFACES; do
 	IPV4_VAR="ip$i"
 	IPV6_VAR="ip6$i"
     #configure interface
-    #Arno: keep random MAC if it is a tap device
-    if [ "$tapdev0" != "$ETH" ]; then
-        #set mac address
-        MACIF="00:$Z${Z2}:00:${index}:$X$Y:$i$i"
-        echo "INFO: configuring interface $ETH with MAC: $MACIF"
-        ifconfig $ETH down
-        ifconfig $ETH hw ether $MACIF
+    #Arno: keep random MAC if it is a tap device, or run outside ogo.py
+    if [ ! -z ${name} ]; then
+        if [ "$tapdev0" != "$ETH" ]; then
+            #set mac address
+            MACIF="00:$Z${Z2}:00:${index}:$X$Y:$i$i"
+            echo "INFO: configuring interface $ETH with MAC: $MACIF"
+            ifconfig $ETH down
+            ifconfig $ETH hw ether $MACIF
+        fi
     fi
     eval IPV4_VAL=\$$IPV4_VAR
     eval IPV6_VAL=\$$IPV6_VAR
