@@ -17,6 +17,7 @@ PACKAGES="tcpdump bridge-utils"
 BASE_PACKAGES="iproute net-tools iputils-ping traceroute mingetty module-init-tools procps vim"
 #to speedup installation use a nearby mirror
 MIRROR="http://ftp.nl.debian.org/debian"
+VERSION="wheezy"
 #=======Config ends here
 
 
@@ -38,7 +39,7 @@ mount -o loop $IMG_NAME $TMPDIR
 
 
 #install base system
-debootstrap --variant=minbase --include="$PACKAGES $BASE_PACKAGES $SERVICES "  stable $TMPDIR $MIRROR
+debootstrap --variant=minbase --include="$PACKAGES $BASE_PACKAGES $SERVICES " $VERSION $TMPDIR $MIRROR
 
 #configure uml modules via hostfs
 echo "hostfs /lib/modules hostfs /usr/lib/uml/modules 0 0" >> $TMPDIR/etc/fstab
