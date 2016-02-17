@@ -42,13 +42,14 @@ mount -o loop $IMG_NAME $TMPDIR
 debootstrap --variant=minbase --include="$PACKAGES $BASE_PACKAGES $SERVICES " $VERSION $TMPDIR $MIRROR
 
 #configure uml modules via hostfs
-echo "hostfs /lib/modules hostfs /usr/lib/uml/modules 0 0" >> $TMPDIR/etc/fstab
-echo "proc /proc proc defaults 0 0
-tmpfs                  /tmp          tmpfs     defaults          0      0
-tmpfs                  /var/log          tmpfs     defaults          0      0
-tmpfs                  /var/lock          tmpfs     defaults          0      0
-tmpfs                  /var/run          tmpfs     defaults          0      0
-tmpfs                  /var/tmp          tmpfs     defaults         0      0
+echo "
+hostfs      /lib/modules    hostfs      /usr/lib/uml/modules    0 0
+proc        /proc           proc        defaults                0 0
+tmpfs       /tmp            tmpfs       defaults                0 0
+tmpfs       /var/log        tmpfs       defaults                0 0
+tmpfs       /var/lock       tmpfs       defaults                0 0
+tmpfs       /var/run        tmpfs       defaults                0 0
+tmpfs       /var/tmp        tmpfs       defaults                0 0
 " >> $TMPDIR/etc/fstab
 
 # Make sure that /lib/modules exists
