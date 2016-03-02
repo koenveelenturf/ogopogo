@@ -23,7 +23,7 @@ else
 	prefix="2001:db8:${x}00:${y}"
 fi
 
-# amount of routers, max = 9
+# amount of routers, max = 99
 routers=6
 
 echo "================================"
