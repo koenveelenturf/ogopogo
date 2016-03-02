@@ -64,16 +64,16 @@ if [[ $y -eq 0 ]] ; then
 		while [[ ${retry6} -ne 0 ]] ; do
 			echo ""
 			echo "Pinging ${prefix}:${j}::${j} ..."
-	        ping6 -c 2 ${prefix}${j}::${j} > /dev/null
-	        rc=$?
-	        if [[ $rc -eq 0 ]] ; then
-	            echo "L$j is reachable over IPv6!"
-	            retry6=0
-	        else
-	            echo "L$j is NOT reachable over IPv6!"
-	       		retry6=$[retry6-1]
-	       		echo "I will try another $retry6 time(s)!"
-	       	fi
+		        ping6 -c 2 ${prefix}${j}::${j} > /dev/null
+		        rc=$?
+		        if [[ $rc -eq 0 ]] ; then
+		            echo "L$j is reachable over IPv6!"
+		            retry6=0
+		        else
+		            echo "L$j is NOT reachable over IPv6!"
+		       		retry6=$[retry6-1]
+		       		echo "I will try another $retry6 time(s)!"
+		       	fi
 	   	done
 	done
 else
@@ -83,13 +83,13 @@ else
 		while [[ ${retry6} -ne 0 ]] ; do
 			echo ""
 			echo "Pinging ${prefix}${j}::$(echo $j | sed 's/^0*//') ..."
-	        ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
-	        rc=$?
-	        if [[ $rc -eq 0 ]] ; then
-	            echo "L$j is reachable over IPv6!"
-	            retry6=0
+	        	ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
+	        	rc=$?
+	        	if [[ $rc -eq 0 ]] ; then
+	        	echo "L$j is reachable over IPv6!"
+	            	retry6=0
 	        else
-	            echo "L$j is NOT reachable over IPv6!"
+			echo "L$j is NOT reachable over IPv6!"
 	       		retry6=$[retry6-1]
 	       		echo "I will try another $retry6 time(s)!"
 	       	fi
