@@ -18,12 +18,12 @@ x="d"
 y=0
 
 if [[ $y -eq 0 ]] ; then
-    prefix="2001:db8:${x}00:"
+    prefix="2001:db8:${x}00"
 else
-	prefix="2001:db8:${x}00:${y}00:"
+	prefix="2001:db8:${x}00:${y}"
 fi
 
-# amount of routers
+# amount of routers, max = 9
 routers=6
 
 echo "================================"
@@ -57,22 +57,42 @@ do
 		fi
 	done
 done
-
-for (( j=1; j<=$routers; j++ ))
-do
-	retry6=2
-	while [[ ${retry6} -ne 0 ]] ; do
-		echo ""
-		echo "Pinging ${prefix}${j}::${j} ..."
-        ping6 -c 2 ${prefix}${j}::${j} > /dev/null
-        rc=$?
-        if [[ $rc -eq 0 ]] ; then
-            echo "L$j is reachable over IPv6!"
-            retry6=0
-        else
-            echo "L$j is NOT reachable over IPv6!"
-       		retry6=$[retry6-1]
-       		echo "I will try another $retry6 time(s)!"
-       	fi
-   	done
-done
+if [[ $y -eq 0 ]] ; then
+	for (( j=1; j<=$routers; j++ ))
+	do
+		retry6=2
+		while [[ ${retry6} -ne 0 ]] ; do
+			echo ""
+			echo "Pinging ${prefix}:${j}::${j} ..."
+	        ping6 -c 2 ${prefix}${j}::${j} > /dev/null
+	        rc=$?
+	        if [[ $rc -eq 0 ]] ; then
+	            echo "L$j is reachable over IPv6!"
+	            retry6=0
+	        else
+	            echo "L$j is NOT reachable over IPv6!"
+	       		retry6=$[retry6-1]
+	       		echo "I will try another $retry6 time(s)!"
+	       	fi
+	   	done
+	done
+else
+	for j in $(seq -f %02g 1 ${routers})
+	do
+		retry6=2
+		while [[ ${retry6} -ne 0 ]] ; do
+			echo ""
+			echo "Pinging ${prefix}${j}::${j} ..."
+	        ping6 -c 2 ${prefix}${j}::${j} > /dev/null
+	        rc=$?
+	        if [[ $rc -eq 0 ]] ; then
+	            echo "L$j is reachable over IPv6!"
+	            retry6=0
+	        else
+	            echo "L$j is NOT reachable over IPv6!"
+	       		retry6=$[retry6-1]
+	       		echo "I will try another $retry6 time(s)!"
+	       	fi
+	   	done
+	done
+fi
