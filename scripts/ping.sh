@@ -77,13 +77,13 @@ if [[ $y -eq 0 ]] ; then
 	   	done
 	done
 else
-	for j in {01..${routers}}
+	for j in $(seq -f %02g 1 ${routers})
 	do
 		retry6=2
 		while [[ ${retry6} -ne 0 ]] ; do
 			echo ""
-			echo "Pinging ${prefix}$(printf "%02d" ${j})::${j} ..."
-	        ping6 -c 2 ${prefix}${j}::${j} > /dev/null
+			echo "Pinging ${prefix}${j}::$(echo $j | sed 's/^0*//') ..."
+	        ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
 	        rc=$?
 	        if [[ $rc -eq 0 ]] ; then
 	            echo "L$j is reachable over IPv6!"
