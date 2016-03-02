@@ -140,7 +140,7 @@ else
 			done
 		done
 
-		echo -e "\nYou can reach ${result} of the ${routers} routers..."
+		echo -e "\nYou can reach ${result} of the ${routers} routers over IPv4..."
 	fi
 
 	if [[ ! -z $x ]] || [[ ! -z $y ]] ; then
@@ -187,6 +187,6 @@ else
 			done
 		fi
 
-		echo -e "\nYou can reach ${result6} of the ${routers} routers..."
+		echo -e "\nYou can reach ${result6} of the ${routers} routers over IPv6..."
 	fi
 fi
