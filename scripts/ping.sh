@@ -1,7 +1,4 @@
 #!/bin/bash
-# Author: Koen Veelenturf
-
-#!/bin/bash
 #Author: Koen Veelenturf
 
 #Ping script for UvA OS3 Ogopogo labs (INR)
@@ -15,6 +12,7 @@ This script pings all the LAN segments in the Ogopogo topology.
 
 OPTIONS:
 	-r	The amount of routers in the topology
+	-v	Verbose (Get detailed PING, set "-v 1")
 
 	IPv4 values:
 	-a 	The A value from the lab (for the IPv4 network)
@@ -28,7 +26,7 @@ If you do not have IPv4 or IPv6, you can leave out the -a/-b or -x/-y values.
 EOF
 }
 
-while getopts ":a:b:x:y:r:" opt; do
+while getopts ":a:b:x:y:r:v:" opt; do
 	case $opt in
 		a)
 			a=$OPTARG
@@ -62,7 +60,7 @@ while getopts ":a:b:x:y:r:" opt; do
 				exit 1
 			fi
 			;;
-		r|--routers)
+		r)
 			routers=$OPTARG
 			if [ -z "$routers" ]; then
 				usage
@@ -70,15 +68,20 @@ while getopts ":a:b:x:y:r:" opt; do
 				exit 1
 			fi
 			;;
+		v)
+			verbose=1
+			;;
 		\?)
 			usage
 			echo "Invalid options: -$OPTARG"
 			exit 1
 			;;
 		:)
-			usage
-			echo "Option -$OPTARG requires an argument!"
-			exit 1
+			if [ "$OPTARG" != "v" ] ; then
+				usage
+				echo "Option -$OPTARG requires an argument!"
+				exit 1
+			fi
 			;;			
 	esac
 done
@@ -126,7 +129,11 @@ else
 			while [[ ${retry} -ne 0 ]] ; do
 				echo ""
 				echo "Pinging ${a}.${b}.$i.$i ..."
-				ping -c 2 $a.$b.$i.$i > /dev/null
+				if [ $verbose -ne 1 ] ; then
+					ping -c 2 $a.$b.$i.$i > /dev/null
+				else
+					ping -c 2 $a.$b.$i.$i
+				fi
 				rc=$?
 				if [[ $rc -eq 0 ]] ; then
 					echo "L$i is reachable over IPv4!"
@@ -152,7 +159,11 @@ else
 				while [[ ${retry6} -ne 0 ]] ; do
 					echo ""
 					echo "Pinging ${prefix}:${j}::${j} ..."
-				        ping6 -c 2 ${prefix}:${j}::${j} > /dev/null 
+					if [ $verbose -ne 1 ] ; then
+				        	ping6 -c 2 ${prefix}:${j}::${j} > /dev/null
+					else
+						ping6 -c 2 ${prefix}:${j}::${j}
+					fi 
 				        rc=$?
 				        if [[ $rc -eq 0 ]] ; then
 				            echo "L$j is reachable over IPv6!"
@@ -172,8 +183,12 @@ else
 				while [[ ${retry6} -ne 0 ]] ; do
 					echo ""
 					echo "Pinging ${prefix}${j}::$(echo $j | sed 's/^0*//') ..."
-			        	ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
-			        	rc=$?
+					if [ $verbose -ne 1 ] ; then
+			        		ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
+			        	else
+						ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//')
+					fi
+					rc=$?
 			        	if [[ $rc -eq 0 ]] ; then
 			        	echo "L$j is reachable over IPv6!"
 			            	retry6=0
