@@ -1,98 +1,192 @@
 #!/bin/bash
 # Author: Koen Veelenturf
 
-# Number of retries
-#retry=2
-retry6=2
+#!/bin/bash
+#Author: Koen Veelenturf
 
-# A (A.B.x.x)
-a=4
+#Ping script for UvA OS3 Ogopogo labs (INR)
 
-# B (A.B.x.x)
-b=10
+usage()
+{
+cat << EOF
+usage: $0 options
 
-# x (2001:0db8:0x00:0y00::1/58)
-x="d"
+This script pings all the LAN segments in the Ogopogo topology.
 
-# y
-y=0
+OPTIONS:
+	-r --routers	The amount of routers in the topology
 
-if [[ $y -eq 0 ]] ; then
-    prefix="2001:db8:${x}00"
-else
-	prefix="2001:db8:${x}00:${y}"
-fi
+	IPv4 values:
+	-a 		The A value from the lab (for the IPv4 network)
+	-b 		The B value from the lab (for the IPv4 network)
 
-# amount of routers, max = 99
-routers=6
+	IPv6 values:
+	-x 		The X value from the lab (for the IPv6 network)
+	-y 		The Y value from the lab (for the IPv6 network)
 
-echo "================================"
-echo "Amount of routers: ${routers}"
-echo "Value A: ${a}"
-echo "Value B: ${b}"
-echo "Value X: ${x}"
-echo "Value Y: ${y}"
-echo ""
-echo "IPv4 network: ${a}.${b}.x.x"
-echo "IPv6 prefix: ${prefix}:"
-echo ""
-echo "When ping fails, I'll try: 2x"
-echo "================================"
+If you do not have IPv4 or IPv6, you can leave out the -a/-b or -x/-y values.
+EOF
+}
 
-for (( i=1; i<=$routers; i++ ))
-do
-	retry=2
-	while [[ ${retry} -ne 0 ]] ; do
-		echo ""
-		echo "Pinging ${a}.${b}.$i.$i ..."
-		ping -c 2 $a.$b.$i.$i > /dev/null
-		rc=$?
-		if [[ $rc -eq 0 ]] ; then
-			echo "L$i is reachable over IPv4!"
-			retry=0
-		else
-			echo "L$i is NOT reachable over IPv4!"
-			retry=$[$retry-1]
-			echo "I will try another $retry time(s)!"
-		fi
-	done
+while getopts ":a:b:x:y:r:" opt; do
+	case $opt in
+		a)
+			a=$OPTARG
+			if [ -z "$a" ]; then
+				usage
+				echo "Missing argument(s)!"
+				exit 1
+			fi
+			;;
+		b)
+			b=$OPTARG
+			if [ -z "$b" ]; then
+				usage
+				echo "Missing argument(s)!"
+				exit 1
+			fi
+			;;
+		x)
+			x=$OPTARG
+			if [ -z "$x" ]; then
+				usage
+				echo "Missing argument(s)!"
+				exit 1
+			fi
+			;;
+		y)
+			y=$OPTARG
+			if [ -z "$y" ]; then
+				usage
+				echo "Missing argument(s)!"
+				exit 1
+			fi
+			;;
+		r|--routers)
+			routers=$OPTARG
+			if [ -z "$routers" ]; then
+				usage
+				echo "Missing argument(s)!"
+				exit 1
+			fi
+			;;
+		\?)
+			usage
+			echo "Invalid options: -$OPTARG"
+			exit 1
+			;;
+		:)
+			usage
+			echo "Option -$OPTARG requires an argument!"
+			exit 1
+			;;			
+	esac
 done
-if [[ $y -eq 0 ]] ; then
-	for (( j=1; j<=$routers; j++ ))
-	do
-		retry6=2
-		while [[ ${retry6} -ne 0 ]] ; do
-			echo ""
-			echo "Pinging ${prefix}:${j}::${j} ..."
-		        ping6 -c 2 ${prefix}:${j}::${j} > /dev/null
-		        rc=$?
-		        if [[ $rc -eq 0 ]] ; then
-		            echo "L$j is reachable over IPv6!"
-		            retry6=0
-		        else
-		            echo "L$j is NOT reachable over IPv6!"
-		       		retry6=$[retry6-1]
-		       		echo "I will try another $retry6 time(s)!"
-		       	fi
-	   	done
-	done
+
+if [ -z $routers ]  ; then
+	usage
+	exit 1
 else
-	for j in $(seq -f %02g 1 ${routers})
-	do
-		retry6=2
-		while [[ ${retry6} -ne 0 ]] ; do
-			echo ""
-			echo "Pinging ${prefix}${j}::$(echo $j | sed 's/^0*//') ..."
-	        	ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
-	        	rc=$?
-	        	if [[ $rc -eq 0 ]] ; then
-	        	echo "L$j is reachable over IPv6!"
-	            	retry6=0
-	        else
-			echo "L$j is NOT reachable over IPv6!"
-	       		retry6=$[retry6-1]
-	       		echo "I will try another $retry6 time(s)!"
-	       	fi
-	   	done
-	done
+	# Number of retries
+	#retry=2 <-- this variable is set further down the script
+	retry6=2
+
+	if [[ $y -eq 0 ]] ; then
+	    prefix="2001:db8:${x}00"
+	else
+		prefix="2001:db8:${x}00:${y}"
+	fi
+
+	# Initialise result(6) variables
+	result=0
+	result6=0
+
+	echo "================================"
+	echo "Amount of routers: ${routers}"
+	if [ ! -z $a ] && [ ! -z $b ] ; then
+		echo "Value A: ${a}"
+		echo "Value B: ${b}"
+		echo "IPv4 network: ${a}.${b}.x.x"
+	fi
+	if [ ! -z $x ] && [ ! -z $y ] ; then
+		echo "Value X: ${x}"
+		echo "Value Y: ${y}"
+		echo "IPv6 prefix: ${prefix}::"
+	fi
+	
+	echo ""
+	echo "When ping fails, I'll try: 2x"
+	echo "================================"
+
+	if [[ ! -z $a ]] || [[ ! -z $b ]] ; then
+		# IPv4 ping
+		for (( i=1; i<=$routers; i++ ))
+		do
+			retry=2
+			while [[ ${retry} -ne 0 ]] ; do
+				echo ""
+				echo "Pinging ${a}.${b}.$i.$i ..."
+				ping -c 2 $a.$b.$i.$i > /dev/null
+				rc=$?
+				if [[ $rc -eq 0 ]] ; then
+					echo "L$i is reachable over IPv4!"
+					retry=0
+					result=$[$result+1]
+				else
+					echo "L$i is NOT reachable over IPv4!"
+					retry=$[$retry-1]
+					echo "I will try another $retry time(s)!"
+				fi
+			done
+		done
+
+		echo -e "\nYou can reach ${result} of the ${routers} routers..."
+	fi
+
+	if [[ ! -z $x ]] || [[ ! -z $y ]] ; then
+		# IPv6 ping
+		if [[ $y -eq 0 ]] ; then
+			for (( j=1; j<=$routers; j++ ))
+			do
+				retry6=2
+				while [[ ${retry6} -ne 0 ]] ; do
+					echo ""
+					echo "Pinging ${prefix}:${j}::${j} ..."
+				        ping6 -c 2 ${prefix}:${j}::${j} > /dev/null 
+				        rc=$?
+				        if [[ $rc -eq 0 ]] ; then
+				            echo "L$j is reachable over IPv6!"
+				            retry6=0
+					    result6=$[$result6+1]
+				        else
+				            echo "L$j is NOT reachable over IPv6!"
+				       		retry6=$[retry6-1]
+				       		echo "I will try another $retry6 time(s)!"
+				       	fi
+			   	done
+			done
+		else
+			for j in $(seq -f %02g 1 ${routers})
+			do
+				retry6=2
+				while [[ ${retry6} -ne 0 ]] ; do
+					echo ""
+					echo "Pinging ${prefix}${j}::$(echo $j | sed 's/^0*//') ..."
+			        	ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
+			        	rc=$?
+			        	if [[ $rc -eq 0 ]] ; then
+			        	echo "L$j is reachable over IPv6!"
+			            	retry6=0
+					result6=$[$result6+1]
+			        else
+					echo "L$j is NOT reachable over IPv6!"
+			       		retry6=$[retry6-1]
+			       		echo "I will try another $retry6 time(s)!"
+			       	fi
+			   	done
+			done
+		fi
+
+		echo -e "\nYou can reach ${result6} of the ${routers} routers..."
+	fi
 fi
