@@ -14,15 +14,15 @@ usage: $0 options
 This script pings all the LAN segments in the Ogopogo topology.
 
 OPTIONS:
-	-r --routers	The amount of routers in the topology
+	-r	The amount of routers in the topology
 
 	IPv4 values:
-	-a 		The A value from the lab (for the IPv4 network)
-	-b 		The B value from the lab (for the IPv4 network)
+	-a 	The A value from the lab (for the IPv4 network)
+	-b 	The B value from the lab (for the IPv4 network)
 
 	IPv6 values:
-	-x 		The X value from the lab (for the IPv6 network)
-	-y 		The Y value from the lab (for the IPv6 network)
+	-x 	The X value from the lab (for the IPv6 network)
+	-y 	The Y value from the lab (for the IPv6 network)
 
 If you do not have IPv4 or IPv6, you can leave out the -a/-b or -x/-y values.
 EOF
