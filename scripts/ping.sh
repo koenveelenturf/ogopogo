@@ -12,7 +12,7 @@ This script pings all the LAN segments in the Ogopogo topology.
 
 OPTIONS:
 	-r	The amount of routers in the topology
-	-v	Verbose (Get detailed PING, set "-v 1")
+	-v	Verbose (Get detailed PING, set "-v")
 
 	IPv4 values:
 	-a 	The A value from the lab (for the IPv4 network)
@@ -26,7 +26,10 @@ If you do not have IPv4 or IPv6, you can leave out the -a/-b or -x/-y values.
 EOF
 }
 
-while getopts ":a:b:x:y:r:v:" opt; do
+# default verbose
+verbose=0
+
+while getopts ":a:b:x:y:r:v" opt; do
 	case $opt in
 		a)
 			a=$OPTARG
@@ -77,14 +80,14 @@ while getopts ":a:b:x:y:r:v:" opt; do
 			exit 1
 			;;
 		:)
-			if [ "$OPTARG" != "v" ] ; then
-				usage
-				echo "Option -$OPTARG requires an argument!"
-				exit 1
-			fi
+			usage
+			echo "Option -$OPTARG requires an argument!"
+			exit 1
 			;;			
 	esac
 done
+
+shift $((OPTIND-1))
 
 if [ -z $routers ]  ; then
 	usage
@@ -129,10 +132,10 @@ else
 			while [[ ${retry} -ne 0 ]] ; do
 				echo ""
 				echo "Pinging ${a}.${b}.$i.$i ..."
-				if [ $verbose -ne 1 ] ; then
-					ping -c 2 $a.$b.$i.$i > /dev/null
-				else
+				if [ $verbose -eq 1 ] ; then
 					ping -c 2 $a.$b.$i.$i
+				else
+					ping -c 2 $a.$b.$i.$i > /dev/null
 				fi
 				rc=$?
 				if [[ $rc -eq 0 ]] ; then
@@ -159,10 +162,10 @@ else
 				while [[ ${retry6} -ne 0 ]] ; do
 					echo ""
 					echo "Pinging ${prefix}:${j}::${j} ..."
-					if [ $verbose -ne 1 ] ; then
-				        	ping6 -c 2 ${prefix}:${j}::${j} > /dev/null
+					if [ $verbose -eq 1 ] ; then
+				        	ping6 -c 2 ${prefix}:${j}::${j}
 					else
-						ping6 -c 2 ${prefix}:${j}::${j}
+						ping6 -c 2 ${prefix}:${j}::${j} > /dev/null
 					fi 
 				        rc=$?
 				        if [[ $rc -eq 0 ]] ; then
@@ -183,10 +186,10 @@ else
 				while [[ ${retry6} -ne 0 ]] ; do
 					echo ""
 					echo "Pinging ${prefix}${j}::$(echo $j | sed 's/^0*//') ..."
-					if [ $verbose -ne 1 ] ; then
-			        		ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
+					if [ $verbose -eq 1 ] ; then
+			        		ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//')
 			        	else
-						ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//')
+						ping6 -c 2 ${prefix}${j}::$(echo $j | sed 's/^0*//') > /dev/null
 					fi
 					rc=$?
 			        	if [[ $rc -eq 0 ]] ; then
