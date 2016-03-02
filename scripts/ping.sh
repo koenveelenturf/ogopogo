@@ -77,12 +77,12 @@ if [[ $y -eq 0 ]] ; then
 	   	done
 	done
 else
-	for j in $(seq -f %02g 1 ${routers})
+	for j in {01..${routers}}
 	do
 		retry6=2
 		while [[ ${retry6} -ne 0 ]] ; do
 			echo ""
-			echo "Pinging ${prefix}${j}::${j} ..."
+			echo "Pinging ${prefix}$(printf "%02d" ${j})::${j} ..."
 	        ping6 -c 2 ${prefix}${j}::${j} > /dev/null
 	        rc=$?
 	        if [[ $rc -eq 0 ]] ; then
